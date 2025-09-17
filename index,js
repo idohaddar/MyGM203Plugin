@@ -1,33 +1,49 @@
-exports.name = "GM-203 as Motherboard LED Strip";
-exports.author = "idoido121";
+exports.name = "GM-203 Virtual RGB Device Advanced";
+exports.author = "YourName";
 exports.version = "1.0.0";
 
 exports.device = {
-  leds: 30,              // Number of virtual LEDs to simulate
-  layout: "linear",      // Layout style (linear strip)
-  description: "Virtual LED strip device for GM-203 synced with motherboard LEDs"
+  leds: 30,
+  layout: "linear",
+  description: "Virtual RGB device mimicking GM-203 LED strip synced with motherboard LEDs"
 };
 
-// Called once when plugin starts
+let brightness = 1.0; // brightness user setting
+
+// Called on plugin initialization
 exports.init = async function () {
-  console.log("GM-203 SignalRGB Plugin initialized");
+  console.log("GM-203 advanced plugin initializing");
+  this.brightness = brightness;
 };
 
-// Called each frame to update device LED colors
-// colors is an array of RGB arrays from the motherboard or global lighting
-exports.update = function (device, colors) {
-  for (let i = 0; i < this.device.leds; i++) {
-    // Assign colors from incoming source to our virtual LEDs
-    device.setColor(i, colors[i] || [0, 0, 0]);  // Fallback black/off
+// Called when user changes settings
+exports.userControl = function (device, type, value) {
+  if (type === "brightness") {
+    this.brightness = value;
+    console.log("Brightness set to", value);
   }
 };
 
-// Optional: device connect event
-exports.onConnect = function () {
-  console.log("GM-203 virtual LED strip connected");
+// Function to apply brightness to color array
+function applyBrightness(rgbArray, brightness) {
+  return rgbArray.map(c => Math.min(255, Math.max(0, Math.round(c * brightness))));
+}
+
+// Called every frame to update LEDs colors
+exports.update = function (device, colors) {
+  for (let i = 0; i < this.device.leds; i++) {
+    // Apply brightness and set color; fallback to black
+    const color = colors[i] ? applyBrightness(colors[i], this.brightness) : [0, 0, 0];
+    device.setColor(i, color);
+  }
 };
 
-// Optional: device disconnect event
+// Called when device connects
+exports.onConnect = function () {
+  console.log("GM-203 virtual device connected");
+};
+
+// Called when device disconnects
 exports.onDisconnect = function () {
-  console.log("GM-203 virtual LED strip disconnected");
+  console.log("GM-203 virtual device disconnected");
 };
