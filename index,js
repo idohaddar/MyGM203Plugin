@@ -1,0 +1,33 @@
+exports.name = "GM-203 as Motherboard LED Strip";
+exports.author = "idoido121";
+exports.version = "1.0.0";
+
+exports.device = {
+  leds: 30,              // Number of virtual LEDs to simulate
+  layout: "linear",      // Layout style (linear strip)
+  description: "Virtual LED strip device for GM-203 synced with motherboard LEDs"
+};
+
+// Called once when plugin starts
+exports.init = async function () {
+  console.log("GM-203 SignalRGB Plugin initialized");
+};
+
+// Called each frame to update device LED colors
+// colors is an array of RGB arrays from the motherboard or global lighting
+exports.update = function (device, colors) {
+  for (let i = 0; i < this.device.leds; i++) {
+    // Assign colors from incoming source to our virtual LEDs
+    device.setColor(i, colors[i] || [0, 0, 0]);  // Fallback black/off
+  }
+};
+
+// Optional: device connect event
+exports.onConnect = function () {
+  console.log("GM-203 virtual LED strip connected");
+};
+
+// Optional: device disconnect event
+exports.onDisconnect = function () {
+  console.log("GM-203 virtual LED strip disconnected");
+};
